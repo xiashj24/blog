@@ -1,0 +1,15 @@
+www.xiashj.com {
+    root * /var/www/blog
+    file_server
+    encode gzip
+
+    handle_errors {
+        rewrite * /404.html
+        file_server
+    }
+}
+
+# Redirect bare domain to www
+xiashj.com {
+    redir https://www.xiashj.com{uri} permanent
+}
