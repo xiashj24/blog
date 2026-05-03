@@ -1,0 +1,51 @@
+---
+import { Font } from 'astro:assets';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import RecipeDetail from '../../components/cook/RecipeDetail.svelte';
+import { getAllRecipeDetails } from '../../lib/recipes';
+import { glossary } from '../../lib/glossary';
+
+export async function getStaticPaths() {
+  const recipes = await getAllRecipeDetails();
+  return recipes.map((recipe) => ({
+    params: { slug: recipe.slug },
+    props: { recipe },
+  }));
+}
+
+const { recipe } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={recipe.name} description={recipe.description} />
+    <Font cssVariable="--font-mplus" preload />
+    <style>body { font-family: var(--font-mplus); }</style>
+  </head>
+  <body>
+    <main>
+      {recipe.image && (
+        <img
+          src={`/recipes/images/${recipe.image}`}
+          alt={recipe.name}
+          class="w-full max-h-72 object-cover rounded-xl mb-6"
+        />
+      )}
+      <h1 class="text-3xl font-bold mb-2">{recipe.name}</h1>
+      {recipe.description && (
+        <p class="text-gray-600 mb-6">{recipe.description}</p>
+      )}
+      {recipe.tags.length > 0 && (
+        <div class="flex flex-wrap gap-2 mb-6">
+          {recipe.tags.map((tag) => (
+            <span class="text-sm px-3 py-1 bg-gray-100 text-gray-600 rounded-full">{tag}</span>
+          ))}
+        </div>
+      )}
+      <RecipeDetail client:load {recipe} {glossary} />
+    </main>
+    <Footer />
+  </body>
+</html>

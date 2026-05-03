@@ -35,7 +35,14 @@ export default defineConfig({
               ],
           },
       },
-	],
+      {
+          provider: fontProviders.google(),
+          name: 'M PLUS Rounded 1c',
+          cssVariable: '--font-mplus',
+          fallbacks: ['sans-serif'],
+          weights: [400, 700],
+      },
+  ],
 
   vite: {
     plugins: [tailwindcss()],

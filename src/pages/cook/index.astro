@@ -1,0 +1,25 @@
+---
+import { Font } from 'astro:assets';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import RecipeList from '../../components/cook/RecipeList.svelte';
+import { getAllRecipes } from '../../lib/recipes';
+import { glossary } from '../../lib/glossary';
+
+const recipes = await getAllRecipes();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title="Recipes" description="Personal recipe collection" />
+    <Font cssVariable="--font-mplus" preload />
+    <style>body { font-family: var(--font-mplus); }</style>
+  </head>
+  <body>
+    <main>
+      <RecipeList client:load {recipes} {glossary} />
+    </main>
+    <Footer />
+  </body>
+</html>
