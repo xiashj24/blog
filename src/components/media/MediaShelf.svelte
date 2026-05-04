@@ -124,12 +124,7 @@
 
             <!-- Info -->
             <div style="flex: 1; min-width: 0;">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
-                <h3 class="media-title">{item.title}</h3>
-                <span class="media-date">
-                  {new Date(item.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                </span>
-              </div>
+              <h3 class="media-title">{item.title}</h3>
 
               <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.375rem; margin-top: 0.25rem;">
                 <span class="type-badge">
@@ -138,6 +133,9 @@
                 {#if item.status === 'dropped'}
                   <span class="dropped-badge">Dropped</span>
                 {/if}
+                <span class="media-date">
+                  {new Date(item.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                </span>
               </div>
 
               {#if item.author}
