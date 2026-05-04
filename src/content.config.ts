@@ -17,4 +17,21 @@ const blog = defineCollection({
 		}),
 });
 
-export const collections = { blog };
+const media = defineCollection({
+	loader: glob({ base: './src/content/media', pattern: '**/*.md' }),
+	schema: ({ image }) =>
+		z.object({
+			title: z.string(),
+			type: z.enum(['movie', 'book', 'game']),
+			status: z.enum(['completed', 'dropped']).default('completed'),
+			date: z.coerce.date(), // date I finished it
+			cover: image().optional(),
+			tags: z.array(z.string()).optional(),
+			author: z.string().optional(),    // book
+			director: z.string().optional(),  // movie
+			year: z.number().int().optional(), // movie/game release year
+			platform: z.string().optional(),  // game
+		}),
+});
+
+export const collections = { blog, media };

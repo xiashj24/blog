@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import MediaShelf from '../../components/media/MediaShelf.svelte';
+
+const entries = (await getCollection('media')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const mediaItems = entries.map((entry) => ({
+  slug: entry.id,
+  title: entry.data.title,
+  type: entry.data.type,
+  status: entry.data.status,
+  date: entry.data.date.toISOString(),
+  coverSrc: entry.data.cover?.src ?? null,
+  tags: entry.data.tags ?? [],
+  author: entry.data.author ?? null,
+  director: entry.data.director ?? null,
+  year: entry.data.year ?? null,
+  platform: entry.data.platform ?? null,
+}));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title="Shelf" description="Books, movies, and games." />
+  </head>
+  <body>
+    <Header />
+    <main>
+      <section>
+        <h1>Shelf</h1>
+        <MediaShelf client:load items={mediaItems} />
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>

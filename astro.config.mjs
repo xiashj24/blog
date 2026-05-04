@@ -6,11 +6,26 @@ import { defineConfig, fontProviders } from 'astro/config';
 
 import svelte from '@astrojs/svelte';
 import tailwindcss from '@tailwindcss/vite';
+import remarkWikiLink from 'remark-wiki-link';
+
+const slugify = (t) =>
+  t.toLowerCase().replace(/[^\w\s-]/g, '').trim().replace(/[\s_]+/g, '-');
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://www.xiashj.com',
   integrations: [mdx(), sitemap(), svelte()],
+
+  markdown: {
+    remarkPlugins: [
+      [remarkWikiLink, {
+        pageResolver: (name) => [slugify(name)],
+        hrefTemplate: (permalink) => `/media/${permalink}`,
+        wikiLinkClassName: 'wiki-link',
+        newClassName: 'wiki-link-new',
+      }],
+    ],
+  },
 
   fonts: [
       {

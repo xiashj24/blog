@@ -1,0 +1,205 @@
+---
+import { Image } from 'astro:assets';
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import Header from '../../components/Header.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('media');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: entry,
+  }));
+}
+
+type Props = CollectionEntry<'media'>;
+
+const entry = Astro.props;
+const { Content } = await render(entry);
+const { title, type, status, date, cover, author, director, year, platform, tags } = entry.data;
+
+const TYPE_LABELS: Record<string, string> = { movie: 'Movie', book: 'Book', game: 'Game' };
+const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: '🎮' };
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={title} description={`${TYPE_LABELS[type]} — ${title}`} />
+  </head>
+  <body>
+    <Header />
+    <main>
+      <article>
+        <div class="entry-header">
+          {cover && (
+            <div class="cover-wrap">
+              <Image
+                src={cover}
+                alt={title}
+                width={180}
+                height={270}
+                class="cover-img"
+              />
+            </div>
+          )}
+          <div class="entry-meta">
+            <p class="type-label">{TYPE_ICONS[type]} {TYPE_LABELS[type]}</p>
+            <h1>{title}</h1>
+
+            <dl class="meta-list">
+              <div>
+                <dt>Finished</dt>
+                <dd><FormattedDate date={date} /></dd>
+              </div>
+              {status === 'dropped' && (
+                <div>
+                  <dt>Status</dt>
+                  <dd class="dropped">Dropped</dd>
+                </div>
+              )}
+              {author && (
+                <div>
+                  <dt>Author</dt>
+                  <dd>{author}</dd>
+                </div>
+              )}
+              {director && (
+                <div>
+                  <dt>Director</dt>
+                  <dd>{director}</dd>
+                </div>
+              )}
+              {year && (
+                <div>
+                  <dt>Year</dt>
+                  <dd>{year}</dd>
+                </div>
+              )}
+              {platform && (
+                <div>
+                  <dt>Platform</dt>
+                  <dd>{platform}</dd>
+                </div>
+              )}
+            </dl>
+
+            {tags && tags.length > 0 && (
+              <div class="tags">
+                {tags.map((tag) => <span class="tag">{tag}</span>)}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div class="prose">
+          <Content />
+        </div>
+
+        <div class="back-link">
+          <a href="/media">← Back to Shelf</a>
+        </div>
+      </article>
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  .entry-header {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+  }
+
+  .cover-wrap {
+    flex-shrink: 0;
+  }
+
+  .cover-img {
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 16px rgba(var(--black), 0.12);
+    object-fit: cover;
+  }
+
+  .entry-meta {
+    flex: 1;
+  }
+
+  .type-label {
+    font-size: 0.875rem;
+    color: rgb(var(--gray));
+    margin: 0 0 0.25rem;
+  }
+
+  h1 {
+    margin: 0 0 1rem;
+  }
+
+  .meta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+  }
+
+  .meta-list div {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .meta-list dt {
+    font-weight: 600;
+    color: rgb(var(--black));
+    min-width: 5rem;
+  }
+
+  .meta-list dd {
+    margin: 0;
+    color: rgb(var(--gray));
+  }
+
+  .dropped {
+    color: #dc2626;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-top: 0.75rem;
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.625rem;
+    background: rgba(var(--gray-light), 1);
+    color: rgb(var(--gray));
+    border-radius: 9999px;
+  }
+
+  .prose {
+    border-top: 1px solid rgba(var(--gray-light), 1);
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .back-link {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(var(--gray-light), 1);
+  }
+
+  .back-link a {
+    font-size: 0.875rem;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .back-link a:hover {
+    text-decoration: underline;
+  }
+</style>
