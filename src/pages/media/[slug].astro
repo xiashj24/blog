@@ -54,10 +54,10 @@ const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: 
                 <dt>Finished</dt>
                 <dd><FormattedDate date={date} /></dd>
               </div>
-              {status === 'dropped' && (
+              {status === 'interested' && (
                 <div>
                   <dt>Status</dt>
-                  <dd class="dropped">Dropped</dd>
+                  <dd class="interested">Interested</dd>
                 </div>
               )}
               {author && (
@@ -174,8 +174,8 @@ const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: 
     color: rgb(var(--gray));
   }
 
-  .dropped {
-    color: #dc2626;
+  .interested {
+    color: #a16207;
   }
 
   .tags {

@@ -1,0 +1,9 @@
+---
+title: ''
+type: 'book'
+status: 'completed'
+date: '2025-01-01'
+cover: ./covers/.jpg
+author: ''
+tags: []
+---

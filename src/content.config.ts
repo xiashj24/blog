@@ -23,7 +23,7 @@ const media = defineCollection({
 		z.object({
 			title: z.string(),
 			type: z.enum(['movie', 'book', 'game', 'album']),
-			status: z.enum(['completed', 'dropped']).default('completed'),
+			status: z.enum(['completed', 'interested']).default('completed'),
 			date: z.coerce.date(), // date I finished it
 			cover: image().optional(),
 			tags: z.array(z.string()).optional(),

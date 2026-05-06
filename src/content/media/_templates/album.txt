@@ -1,0 +1,10 @@
+---
+title: ''
+type: 'album'
+status: 'completed'
+date: '2025-01-01'
+cover: ./covers/.jpg
+artist: ''
+year: 0
+tags: []
+---

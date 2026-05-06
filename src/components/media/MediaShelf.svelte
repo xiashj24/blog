@@ -25,11 +25,13 @@
   let activeYearMonth = $state<string | null>(null);
   let activeYear = $state<number | null>(null);
   let activeTag = $state<string | null>(null);
+  let activeStatus = $state<string | null>(null);
 
   const filtered = $derived(
     items.filter((item) => {
       const typeMatch = activeFilter === 'all' || item.type === activeFilter;
       if (!typeMatch) return false;
+      if (activeStatus && item.status !== activeStatus) return false;
       if (activeTag && !item.tags.includes(activeTag)) return false;
       const d = new Date(item.date);
       if (activeYearMonth) {
@@ -90,14 +92,34 @@
     Filters {filtersOpen ? '▲' : '▼'}
   </button>
   <aside class="shelf-sidebar" class:shelf-sidebar--open={filtersOpen}>
-    <div class="sidebar-label">Filter</div>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+      <div class="sidebar-label" style="margin-bottom: 0;">Filter</div>
+      {#if activeFilter !== 'all' || activeStatus || activeTag || activeYear || activeYearMonth}
+        <button
+          onclick={() => { activeFilter = 'all'; activeStatus = null; activeTag = null; activeYear = null; activeYearMonth = null; }}
+          class="clear-btn"
+        >× clear all</button>
+      {/if}
+    </div>
     <div style="display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 1.5rem;">
       {#each (['all', 'movie', 'book', 'game', 'album'] as FilterType[]) as ft}
         <button
-          onclick={() => { activeFilter = ft; activeYearMonth = null; activeYear = null; activeTag = null; }}
+          onclick={() => { activeFilter = ft; activeYearMonth = null; activeYear = null; activeTag = null; activeStatus = null; }}
           class="filter-btn {activeFilter === ft ? 'filter-btn--active' : ''}"
         >
           {ft === 'all' ? 'All' : `${TYPE_ICONS[ft]} ${TYPE_LABELS[ft]}`}
+        </button>
+      {/each}
+    </div>
+
+    <div class="sidebar-label" style="margin-top: 1rem;">By Status</div>
+    <div style="display: flex; flex-direction: column; gap: 0.125rem; margin-bottom: 1.5rem;">
+      {#each ['completed', 'interested'] as s}
+        <button
+          onclick={() => { activeStatus = activeStatus === s ? null : s; }}
+          class="month-btn {activeStatus === s ? 'month-btn--active' : ''}"
+        >
+          {s === 'completed' ? 'Completed' : 'Interested'}
         </button>
       {/each}
     </div>
@@ -174,8 +196,8 @@
                 <span class="type-badge">
                   {TYPE_ICONS[item.type]} {TYPE_LABELS[item.type]}
                 </span>
-                {#if item.status === 'dropped'}
-                  <span class="dropped-badge">Dropped</span>
+                {#if item.status === 'interested'}
+                  <span class="interested-badge">Interested</span>
                 {/if}
                 <span class="media-date">
                   {new Date(item.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
@@ -338,8 +360,8 @@
   }
 
   .year-label--active {
-    background: rgba(var(--accent-dark), 0.1);
-    color: var(--accent-dark);
+    background: transparent;
+    color: #ea580c;
   }
 
   .month-btn {
@@ -360,8 +382,8 @@
   }
 
   .month-btn--active {
-    background: rgba(var(--accent-dark), 0.1);
-    color: var(--accent-dark);
+    background: transparent;
+    color: #ea580c;
     font-weight: 500;
   }
 
@@ -435,11 +457,11 @@
     border-radius: 9999px;
   }
 
-  .dropped-badge {
+  .interested-badge {
     font-size: 0.7rem;
     padding: 0.125rem 0.5rem;
-    background: #fee2e2;
-    color: #dc2626;
+    background: #fef9c3;
+    color: #a16207;
     border-radius: 9999px;
   }
 

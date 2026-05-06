@@ -1,0 +1,10 @@
+---
+title: ''
+type: 'game'
+status: 'completed'
+date: '2025-01-01'
+cover: ./covers/.jpg
+platform: ''
+year: 0
+tags: []
+---
