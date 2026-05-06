@@ -4,6 +4,7 @@ type: 'book'
 status: 'completed'
 date: '2024-03-15'
 author: 'Liu Cixin'
+cover: ./covers/the-three-body-problem.jpg
 tags: ['sci-fi', 'hard-sci-fi', 'chinese-literature']
 ---
 

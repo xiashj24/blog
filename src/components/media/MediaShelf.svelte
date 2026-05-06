@@ -2,7 +2,7 @@
   interface MediaItem {
     slug: string;
     title: string;
-    type: 'movie' | 'book' | 'game';
+    type: 'movie' | 'book' | 'game' | 'album';
     status: 'completed' | 'dropped';
     date: string; // ISO string
     coverSrc: string | null;
@@ -11,6 +11,7 @@
     director: string | null;
     year: number | null;
     platform: string | null;
+    artist: string | null;
   }
 
   interface Props {
@@ -19,19 +20,23 @@
 
   const { items }: Props = $props();
 
-  type FilterType = 'all' | 'movie' | 'book' | 'game';
+  type FilterType = 'all' | 'movie' | 'book' | 'game' | 'album';
   let activeFilter = $state<FilterType>('all');
   let activeYearMonth = $state<string | null>(null);
+  let activeYear = $state<number | null>(null);
+  let activeTag = $state<string | null>(null);
 
   const filtered = $derived(
     items.filter((item) => {
       const typeMatch = activeFilter === 'all' || item.type === activeFilter;
       if (!typeMatch) return false;
+      if (activeTag && !item.tags.includes(activeTag)) return false;
+      const d = new Date(item.date);
       if (activeYearMonth) {
-        const d = new Date(item.date);
         const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         return ym === activeYearMonth;
       }
+      if (activeYear && d.getFullYear() !== activeYear) return false;
       return true;
     })
   );
@@ -49,6 +54,13 @@
     return index;
   });
 
+  const tagIndex = $derived(() => {
+    const source = activeFilter === 'all' ? items : items.filter((i) => i.type === activeFilter);
+    const tags = new Set<string>();
+    for (const item of source) for (const tag of item.tags) tags.add(tag);
+    return [...tags].sort();
+  });
+
   const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   function formatYM(ym: string): string {
@@ -56,12 +68,18 @@
     return `${MONTH_NAMES[parseInt(m) - 1]} ${y}`;
   }
 
-  function toggleYearMonth(ym: string) {
-    activeYearMonth = activeYearMonth === ym ? null : ym;
+  function toggleYear(y: number) {
+    if (activeYear === y) { activeYear = null; }
+    else { activeYear = y; activeYearMonth = null; }
   }
 
-  const TYPE_LABELS: Record<string, string> = { movie: 'Movie', book: 'Book', game: 'Game' };
-  const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: '🎮' };
+  function toggleYearMonth(ym: string) {
+    if (activeYearMonth === ym) { activeYearMonth = null; }
+    else { activeYearMonth = ym; activeYear = null; }
+  }
+
+  const TYPE_LABELS: Record<string, string> = { movie: 'Movie', book: 'Book', game: 'Game', album: 'Album' };
+  const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: '🎮', album: '🎵' };
 </script>
 
 <div style="display: flex; gap: 1.5rem; align-items: flex-start;">
@@ -69,9 +87,9 @@
   <aside style="width: 9rem; flex-shrink: 0; position: sticky; top: 1.5rem;">
     <div class="sidebar-label">Filter</div>
     <div style="display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 1.5rem;">
-      {#each (['all', 'movie', 'book', 'game'] as FilterType[]) as ft}
+      {#each (['all', 'movie', 'book', 'game', 'album'] as FilterType[]) as ft}
         <button
-          onclick={() => { activeFilter = ft; activeYearMonth = null; }}
+          onclick={() => { activeFilter = ft; activeYearMonth = null; activeYear = null; activeTag = null; }}
           class="filter-btn {activeFilter === ft ? 'filter-btn--active' : ''}"
         >
           {ft === 'all' ? 'All' : `${TYPE_ICONS[ft]} ${TYPE_LABELS[ft]}`}
@@ -79,10 +97,24 @@
       {/each}
     </div>
 
-    <div class="sidebar-label">By Month</div>
+    {#if tagIndex().length > 0}
+      <div class="sidebar-label" style="margin-top: 1rem;">By Tag</div>
+      <div style="display: flex; flex-direction: column; gap: 0.125rem; margin-bottom: 1.5rem;">
+        {#each tagIndex() as tag}
+          <button
+            onclick={() => { activeTag = activeTag === tag ? null : tag; }}
+            class="month-btn {activeTag === tag ? 'month-btn--active' : ''}"
+          >
+            {tag}
+          </button>
+        {/each}
+      </div>
+    {/if}
+
+    <div class="sidebar-label">By Time</div>
     {#each [...yearMonthIndex()].sort((a, b) => b[0] - a[0]) as [year, months]}
       <div style="margin-bottom: 0.75rem;">
-        <div class="year-label">{year}</div>
+        <button onclick={() => toggleYear(year)} class="year-label {activeYear === year ? 'year-label--active' : ''}">{year}</button>
         <div style="display: flex; flex-direction: column; gap: 0.125rem;">
           {#each [...months].sort((a, b) => b - a) as month}
             {@const ym = `${year}-${String(month).padStart(2, '0')}`}
@@ -100,10 +132,26 @@
 
   <!-- Timeline -->
   <div style="flex: 1; min-width: 0;">
-    {#if activeYearMonth}
-      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-        <h2 style="font-size: 1.125rem; font-weight: 600; margin: 0;">{formatYM(activeYearMonth)}</h2>
-        <button onclick={() => (activeYearMonth = null)} class="clear-btn">× clear</button>
+    {#if activeYearMonth || activeYear || activeTag}
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;">
+        {#if activeYear}
+          <div style="display: flex; align-items: center; gap: 0.375rem;">
+            <h2 style="font-size: 1.125rem; font-weight: 600; margin: 0;">{activeYear}</h2>
+            <button onclick={() => (activeYear = null)} class="clear-btn">× clear</button>
+          </div>
+        {/if}
+        {#if activeYearMonth}
+          <div style="display: flex; align-items: center; gap: 0.375rem;">
+            <h2 style="font-size: 1.125rem; font-weight: 600; margin: 0;">{formatYM(activeYearMonth)}</h2>
+            <button onclick={() => (activeYearMonth = null)} class="clear-btn">× clear</button>
+          </div>
+        {/if}
+        {#if activeTag}
+          <div style="display: flex; align-items: center; gap: 0.375rem;">
+            <span style="font-size: 1.125rem; font-weight: 600;">#{activeTag}</span>
+            <button onclick={() => (activeTag = null)} class="clear-btn">× clear</button>
+          </div>
+        {/if}
       </div>
     {/if}
 
@@ -113,15 +161,6 @@
       <div style="display: flex; flex-direction: column; gap: 1rem;">
         {#each filtered as item (item.slug)}
           <a href={`/media/${item.slug}`} class="media-card">
-            <!-- Cover -->
-            <div class="media-cover">
-              {#if item.coverSrc}
-                <img src={item.coverSrc} alt={item.title} style="width: 100%; height: 100%; object-fit: cover;" loading="lazy" />
-              {:else}
-                <span style="font-size: 1.5rem;">{TYPE_ICONS[item.type]}</span>
-              {/if}
-            </div>
-
             <!-- Info -->
             <div style="flex: 1; min-width: 0;">
               <h3 class="media-title">{item.title}</h3>
@@ -144,14 +183,33 @@
                 <p class="media-meta">dir. {item.director}{item.year ? ` (${item.year})` : ''}</p>
               {:else if item.platform}
                 <p class="media-meta">on {item.platform}</p>
+              {:else if item.artist}
+                <p class="media-meta">by {item.artist}</p>
+              {:else}
+                <p class="media-meta media-meta--missing">no info</p>
               {/if}
 
               {#if item.tags.length > 0}
                 <div style="display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.5rem;">
                   {#each item.tags as tag}
-                    <span class="tag">{tag}</span>
+                    <span
+                      class="tag {activeTag === tag ? 'tag--active' : ''}"
+                      role="button"
+                      tabindex="0"
+                      onclick={(e) => { e.preventDefault(); e.stopPropagation(); activeTag = activeTag === tag ? null : tag; }}
+                      onkeydown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); activeTag = activeTag === tag ? null : tag; } }}
+                    >{tag}</span>
                   {/each}
                 </div>
+              {/if}
+            </div>
+
+            <!-- Cover -->
+            <div class="media-cover">
+              {#if item.coverSrc}
+                <img src={item.coverSrc} alt={item.title} style="height: 100%; width: auto; display: block;" loading="lazy" />
+              {:else}
+                <span style="font-size: 1.5rem;">{TYPE_ICONS[item.type]}</span>
               {/if}
             </div>
           </a>
@@ -198,10 +256,28 @@
   }
 
   .year-label {
+    display: block;
+    width: 100%;
+    text-align: left;
     font-size: 0.875rem;
     font-weight: 600;
     color: rgb(var(--black));
     margin-bottom: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    background: transparent;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  .year-label:hover {
+    background: rgba(var(--gray-light), 1);
+  }
+
+  .year-label--active {
+    background: rgba(var(--accent-dark), 0.1);
+    color: var(--accent-dark);
   }
 
   .month-btn {
@@ -242,11 +318,12 @@
 
   .media-card {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
+    align-items: center;
     border-radius: 0.75rem;
     border: 1px solid rgba(var(--gray-light), 1);
     background: white;
-    padding: 1rem;
+    padding: 0.75rem;
     text-decoration: none;
     color: inherit;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -259,11 +336,11 @@
 
   .media-cover {
     flex-shrink: 0;
-    width: 4rem;
-    height: 6rem;
+    width: auto;
+    height: 7rem;
     border-radius: 0.5rem;
     overflow: hidden;
-    background: rgba(var(--gray-light), 1);
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -310,6 +387,11 @@
     margin: 0.25rem 0 0;
   }
 
+  .media-meta--missing {
+    color: rgba(var(--gray), 0.4);
+    font-style: italic;
+  }
+
   .tag {
     font-size: 0.7rem;
     padding: 0.125rem 0.375rem;
@@ -317,5 +399,18 @@
     border: 1px solid rgba(var(--gray-light), 1);
     color: rgb(var(--gray));
     border-radius: 0.25rem;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .tag:hover {
+    border-color: rgba(var(--gray), 0.4);
+    color: rgb(var(--black));
+  }
+
+  .tag--active {
+    background: rgba(var(--accent-dark), 0.1);
+    border-color: var(--accent-dark);
+    color: var(--accent-dark);
   }
 </style>

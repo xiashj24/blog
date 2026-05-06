@@ -18,10 +18,10 @@ type Props = CollectionEntry<'media'>;
 
 const entry = Astro.props;
 const { Content } = await render(entry);
-const { title, type, status, date, cover, author, director, year, platform, tags } = entry.data;
+const { title, type, status, date, cover, author, director, year, platform, artist, label, tags } = entry.data;
 
-const TYPE_LABELS: Record<string, string> = { movie: 'Movie', book: 'Book', game: 'Game' };
-const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: '🎮' };
+const TYPE_LABELS: Record<string, string> = { movie: 'Movie', book: 'Book', game: 'Game', album: 'Album' };
+const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: '🎮', album: '🎵' };
 ---
 
 <!doctype html>
@@ -40,7 +40,7 @@ const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: 
                 src={cover}
                 alt={title}
                 width={180}
-                height={270}
+                height={type === 'album' ? 180 : 270}
                 class="cover-img"
               />
             </div>
@@ -82,6 +82,18 @@ const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: 
                 <div>
                   <dt>Platform</dt>
                   <dd>{platform}</dd>
+                </div>
+              )}
+              {artist && (
+                <div>
+                  <dt>Artist</dt>
+                  <dd>{artist}</dd>
+                </div>
+              )}
+              {label && (
+                <div>
+                  <dt>Label</dt>
+                  <dd>{label}</dd>
                 </div>
               )}
             </dl>
