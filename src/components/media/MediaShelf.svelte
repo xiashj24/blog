@@ -80,11 +80,16 @@
 
   const TYPE_LABELS: Record<string, string> = { movie: 'Movie', book: 'Book', game: 'Game', album: 'Album' };
   const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: '🎮', album: '🎵' };
+
+  let filtersOpen = $state(false);
 </script>
 
-<div style="display: flex; gap: 1.5rem; align-items: flex-start;">
+<div class="shelf-layout">
   <!-- Sidebar -->
-  <aside style="width: 9rem; flex-shrink: 0; position: sticky; top: 1.5rem;">
+  <button class="filters-toggle" onclick={() => filtersOpen = !filtersOpen}>
+    Filters {filtersOpen ? '▲' : '▼'}
+  </button>
+  <aside class="shelf-sidebar" class:shelf-sidebar--open={filtersOpen}>
     <div class="sidebar-label">Filter</div>
     <div style="display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 1.5rem;">
       {#each (['all', 'movie', 'book', 'game', 'album'] as FilterType[]) as ft}
@@ -131,7 +136,7 @@
   </aside>
 
   <!-- Timeline -->
-  <div style="flex: 1; min-width: 0;">
+  <div class="shelf-content">
     {#if activeYearMonth || activeYear || activeTag}
       <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;">
         {#if activeYear}
@@ -220,6 +225,63 @@
 </div>
 
 <style>
+  .shelf-layout {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+
+  .shelf-sidebar {
+    width: 9rem;
+    flex-shrink: 0;
+    position: sticky;
+    top: 1.5rem;
+  }
+
+  .shelf-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .filters-toggle {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .shelf-layout {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .filters-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.375rem 0.75rem;
+      border: 1px solid rgba(var(--gray-light), 1);
+      border-radius: 0.5rem;
+      background: white;
+      cursor: pointer;
+      color: rgb(var(--black));
+    }
+
+    .shelf-sidebar {
+      display: none;
+      width: 100%;
+      position: static;
+    }
+
+    .shelf-sidebar--open {
+      display: block;
+    }
+
+    .shelf-content {
+      width: 100%;
+    }
+  }
+
   .sidebar-label {
     font-size: 0.7rem;
     font-weight: 600;
