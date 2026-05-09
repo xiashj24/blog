@@ -22,7 +22,7 @@ const media = defineCollection({
 	schema: ({ image }) =>
 		z.object({
 			title: z.string(),
-			type: z.enum(['movie', 'book', 'game', 'album']),
+			type: z.enum(['movie', 'book', 'game', 'album', 'live']),
 			status: z.enum(['completed', 'interested']).default('completed'),
 			date: z.coerce.date(), // date I finished it
 			cover: image().optional(),
@@ -31,8 +31,10 @@ const media = defineCollection({
 			director: z.string().optional(),  // movie
 			year: z.number().int().optional(), // movie/game/album release year
 			platform: z.string().optional(),  // game
-			artist: z.string().optional(),    // album
+			artist: z.string().optional(),    // album / live
 			label: z.string().optional(),     // album
+			venue: z.string().optional(),     // live
+			artists: z.array(z.string()).optional(), // live (multiple performers)
 		}),
 });
 

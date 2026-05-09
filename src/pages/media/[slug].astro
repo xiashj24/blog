@@ -18,10 +18,10 @@ type Props = CollectionEntry<'media'>;
 
 const entry = Astro.props;
 const { Content } = await render(entry);
-const { title, type, status, date, cover, author, director, year, platform, artist, label, tags } = entry.data;
+const { title, type, status, date, cover, author, director, year, platform, artist, label, venue, artists, tags } = entry.data;
 
-const TYPE_LABELS: Record<string, string> = { movie: 'Movie', book: 'Book', game: 'Game', album: 'Album' };
-const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: '🎮', album: '🎵' };
+const TYPE_LABELS: Record<string, string> = { movie: 'Movie', book: 'Book', game: 'Game', album: 'Album', live: 'Live' };
+const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: '🎮', album: '🎵', live: '🎤' };
 ---
 
 <!doctype html>
@@ -40,7 +40,7 @@ const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: 
                 src={cover}
                 alt={title}
                 width={180}
-                height={type === 'album' ? 180 : 270}
+                height={type === 'album' || type === 'live' ? 180 : 270}
                 class="cover-img"
               />
             </div>
@@ -51,7 +51,7 @@ const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: 
 
             <dl class="meta-list">
               <div>
-                <dt>Finished</dt>
+                <dt>{type === 'live' ? 'Attended' : 'Finished'}</dt>
                 <dd><FormattedDate date={date} /></dd>
               </div>
               {status === 'interested' && (
@@ -84,7 +84,13 @@ const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: 
                   <dd>{platform}</dd>
                 </div>
               )}
-              {artist && (
+              {artists && (
+                <div>
+                  <dt>{artists.length === 1 ? 'Artist' : 'Artists'}</dt>
+                  <dd>{artists.join(', ')}</dd>
+                </div>
+              )}
+              {!artists && artist && (
                 <div>
                   <dt>Artist</dt>
                   <dd>{artist}</dd>
@@ -94,6 +100,12 @@ const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: 
                 <div>
                   <dt>Label</dt>
                   <dd>{label}</dd>
+                </div>
+              )}
+              {venue && (
+                <div>
+                  <dt>Venue</dt>
+                  <dd>{venue}</dd>
                 </div>
               )}
             </dl>

@@ -2,8 +2,8 @@
   interface MediaItem {
     slug: string;
     title: string;
-    type: 'movie' | 'book' | 'game' | 'album';
-    status: 'completed' | 'dropped';
+    type: 'movie' | 'book' | 'game' | 'album' | 'live';
+    status: 'completed' | 'interested';
     date: string; // ISO string
     coverSrc: string | null;
     tags: string[];
@@ -12,6 +12,8 @@
     year: number | null;
     platform: string | null;
     artist: string | null;
+    venue: string | null;
+    artists: string[] | null;
   }
 
   interface Props {
@@ -20,7 +22,7 @@
 
   const { items }: Props = $props();
 
-  type FilterType = 'all' | 'movie' | 'book' | 'game' | 'album';
+  type FilterType = 'all' | 'movie' | 'book' | 'game' | 'album' | 'live';
   let activeFilter = $state<FilterType>('all');
   let activeYearMonth = $state<string | null>(null);
   let activeYear = $state<number | null>(null);
@@ -80,8 +82,8 @@
     else { activeYearMonth = ym; activeYear = null; }
   }
 
-  const TYPE_LABELS: Record<string, string> = { movie: 'Movie', book: 'Book', game: 'Game', album: 'Album' };
-  const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: '🎮', album: '🎵' };
+  const TYPE_LABELS: Record<string, string> = { movie: 'Movie', book: 'Book', game: 'Game', album: 'Album', live: 'Live' };
+  const TYPE_ICONS: Record<string, string> = { movie: '🎬', book: '📚', game: '🎮', album: '🎵', live: '🎤' };
 
   let filtersOpen = $state(false);
 </script>
@@ -102,7 +104,7 @@
       {/if}
     </div>
     <div style="display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 1.5rem;">
-      {#each (['all', 'movie', 'book', 'game', 'album'] as FilterType[]) as ft}
+      {#each (['all', 'movie', 'book', 'game', 'album', 'live'] as FilterType[]) as ft}
         <button
           onclick={() => { activeFilter = ft; activeYearMonth = null; activeYear = null; activeTag = null; activeStatus = null; }}
           class="filter-btn {activeFilter === ft ? 'filter-btn--active' : ''}"
@@ -210,8 +212,14 @@
                 <p class="media-meta">dir. {item.director}{item.year ? ` (${item.year})` : ''}</p>
               {:else if item.platform}
                 <p class="media-meta">on {item.platform}</p>
+              {:else if (item.artists || item.artist) && item.venue}
+                <p class="media-meta">{item.artists ? item.artists.join(', ') : item.artist} at {item.venue}</p>
+              {:else if item.artists}
+                <p class="media-meta">{item.artists.join(', ')}</p>
               {:else if item.artist}
                 <p class="media-meta">by {item.artist}</p>
+              {:else if item.venue}
+                <p class="media-meta">at {item.venue}</p>
               {:else}
                 <p class="media-meta media-meta--missing">no info</p>
               {/if}

@@ -9,8 +9,8 @@ Caddyfile — serves dist/ at www.xiashj.com, redirects bare domain to www
 ## Media Shelf (src/pages/media/, src/components/media/MediaShelf.svelte)
 
 Content collection at src/content/media/ with Zod schema in src/content.config.ts.
-Supported types: movie, book, game, album — differentiated by a `type` field in frontmatter.
-Type-specific optional fields: author (book), director + year (movie), platform (game), artist + label (album).
+Supported types: movie, book, game, album, live — differentiated by a `type` field in frontmatter.
+Type-specific optional fields: author (book), director + year (movie), platform (game), artist + label (album), artist + venue (live).
 
 Cover images live in src/content/media/covers/ and are referenced as `cover: ./covers/<filename>` in frontmatter.
 
@@ -22,7 +22,7 @@ scripts/fetch-cover.mjs — CLI to download cover art from the web:
   Usage: node scripts/fetch-cover.mjs <type> "Title" ["Author/Artist"] [year]
 
 MediaShelf sidebar filters:
-  - By type (All / Movie / Book / Game / Album)
+  - By type (All / Movie / Book / Game / Album / Live)
   - By Tag — derived from items under the active type filter; clicking a card tag also sets it
   - By Time — clickable year labels + month buttons; year and month are mutually exclusive
 
